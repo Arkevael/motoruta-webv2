@@ -22,6 +22,7 @@ Repositorio nuevo y vacío (sin README). En la carpeta del proyecto:
    - ADMIN_PASSWORD = mínimo 8 caracteres
    - PEXELS_API_KEY = clave de https://www.pexels.com/api
    - NOMINATIM_USER_AGENT = MotoRuta/1.0 (tucorreo@ejemplo.com)
+   - GEOAPIFY_API_KEY = clave gratuita de https://www.geoapify.com (recomendada: grifos/talleres/miradores más estables; sin ella se usa solo Overpass)
 4. Deploy.
 
 ## 4. Comprobar

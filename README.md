@@ -97,6 +97,10 @@ El plan gratuito se «duerme» tras ~15 min sin visitas y la primera carga tarda
 
 Incluye `Dockerfile`: se despliega con el flujo normal de cada plataforma. Define las mismas variables de entorno. (Algunas de estas plataformas piden tarjeta o tienen créditos limitados; revisa su plan gratuito vigente.)
 
+### Geoapify (opcional, recomendado)
+
+Los talleres, grifos y miradores se consultan primero a **Geoapify Places** (datos de OpenStreetMap con clave propia, plan gratuito de 3.000 créditos/día sin tarjeta) y, si falla o no hay clave, a **Overpass**. Define `GEOAPIFY_API_KEY` para activarlo. Los lugares del panel admin se suman siempre.
+
 ### Vercel (+ GitHub con redespliegue automático)
 
 El proyecto ya está adaptado: `api/index.js` exporta la app Express como función serverless, `vercel.json` redirige `/api/*` a esa función y añade cabeceras de seguridad, y Leaflet está incluido en `public/vendor/leaflet` (los estáticos los sirve el CDN de Vercel).

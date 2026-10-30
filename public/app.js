@@ -247,7 +247,7 @@ function updateFuel() {
   } else {
     warn.append(el('div', { class: 'note ok', text: `✅ Con tu autonomía de ${range} km no hay tramos largos sin grifos registrados (el mayor es de ~${Math.round(max)} km, saliendo con el tanque lleno).` }));
   }
-  warn.append(el('p', { class: 'hint', text: 'Solo se muestran grifos registrados en OpenStreetMap. En zonas rurales puede haber puntos de venta sin mapear: no dependas de ellos sin confirmar.' }));
+  warn.append(el('p', { class: 'hint', text: 'Solo se muestran grifos registrados en OpenStreetMap (vía Geoapify/Overpass) o agregados a mano. En zonas rurales puede haber puntos de venta sin mapear: no dependas de ellos sin confirmar.' }));
 }
 
 /* ---------- Hora de llegada y luz del día ---------- */

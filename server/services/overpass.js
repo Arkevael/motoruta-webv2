@@ -169,4 +169,4 @@ async function findPlaces(geometry) {
   };
 }
 
-module.exports = { findPlaces };
+module.exports = { findPlaces, sampleRoute, chunkPoints, runPool };

@@ -30,6 +30,17 @@ function install() {
       const coordinates = Array.from({ length: 40 }, (_, i) => [-71.9675 - i * 0.0075, -13.532 + i * 0.007]);
       return json({ code: 'Ok', routes: [{ distance: 72000, duration: 5400, geometry: { type: 'LineString', coordinates } }] });
     }
+    if (u.hostname === 'api.geoapify.com') {
+      assert.equal(opts.method, 'POST');
+      assert.equal(opts.headers['x-api-key'], 'clave-geoapify');
+      const body = JSON.parse(opts.body);
+      assert.ok(body.filter.polyline.coordinates.length >= 2, 'debe enviar la ruta como polilínea');
+      const cats = body.categories.join(',');
+      const f = (id, lon, lat, props) => ({ type: 'Feature', geometry: { type: 'Point', coordinates: [lon, lat] }, properties: { place_id: id, lon, lat, ...props } });
+      if (cats.includes('fuel')) return json({ features: [f('g1', -72.12, -13.38, { name: 'Grifo Geo Uno', categories: ['service.vehicle.fuel'] }), f('g2', -72.0, -13.5, { categories: ['service.vehicle.fuel'], datasource: { raw: { brand: 'Repsol', opening_hours: '24/7' } } })] });
+      if (cats.includes('repair')) return json({ features: [f('t1', -72.05, -13.45, { name: 'Moto Taller Geo', categories: ['service.vehicle.repair.motorcycle'] })] });
+      return json({ features: [f('m1', -72.15, -13.35, { name: 'Mirador Geo', categories: ['tourism.attraction.viewpoint'] })] });
+    }
     if (u.hostname.startsWith('overpass')) {
       return json({
         elements: [

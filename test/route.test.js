@@ -211,3 +211,54 @@ test('CE-07 todos los espejos fallan → findPlaces lanza error (la ruta lo degr
   await assert.rejects(findPlaces({ type: 'LineString', coordinates: [[-72, -13.5], [-72.1, -13.4], [-72.2, -13.3]] }));
   failHosts.delete('overpass');
 });
+
+
+test('GEO-01 con GEOAPIFY_API_KEY usa Geoapify (grifos, taller de moto, mirador) sin tocar Overpass', async () => {
+  process.env.GEOAPIFY_API_KEY = 'clave-geoapify';
+  try {
+    const { findPlaces } = require('../server/services/places');
+    const coordinates = Array.from({ length: 40 }, (_, i) => [-71.9675 - i * 0.0075, -13.532 + i * 0.007]);
+    const before = calls.filter((c) => c.startsWith('overpass')).length;
+    const r = await findPlaces({ type: 'LineString', coordinates });
+    assert.equal(calls.filter((c) => c.startsWith('overpass')).length, before, 'no debe consultar Overpass');
+    assert.deepEqual(r.sources, ['geoapify']);
+    assert.equal(r.complete, true);
+    assert.equal(r.fuel.length, 2);
+    assert.equal(r.fuel.find((x) => x.name === 'Repsol')?.openingHours, '24/7'); // marca y horario desde datasource.raw
+    assert.equal(r.workshops[0].kind, 'moto');
+    assert.equal(r.viewpoints[0].name, 'Mirador Geo');
+    assert.ok(r.fuel.every((x) => x.kmFromStart >= 0 && x.offRouteMeters >= 0));
+  } finally { delete process.env.GEOAPIFY_API_KEY; }
+});
+
+test('GEO-02 Geoapify caído → recurre a Overpass y la ruta sigue completa', async () => {
+  process.env.GEOAPIFY_API_KEY = 'clave-geoapify';
+  failHosts.add('api.geoapify.com');
+  try {
+    const { findPlaces } = require('../server/services/places');
+    const coordinates = Array.from({ length: 40 }, (_, i) => [-71.9675 - i * 0.0075, -13.532 + i * 0.007]);
+    const r = await findPlaces({ type: 'LineString', coordinates });
+    assert.deepEqual(r.sources, ['overpass']);
+    assert.ok(r.fuel.length > 0);
+    assert.equal(r.complete, true);
+  } finally { failHosts.delete('api.geoapify.com'); delete process.env.GEOAPIFY_API_KEY; }
+});
+
+test('GEO-03 Geoapify y Overpass caídos → error (la ruta lo degrada con aviso)', async () => {
+  process.env.GEOAPIFY_API_KEY = 'clave-geoapify';
+  failHosts.add('api.geoapify.com'); failHosts.add('overpass');
+  try {
+    const { findPlaces } = require('../server/services/places');
+    await assert.rejects(findPlaces({ type: 'LineString', coordinates: [[-72, -13.5], [-72.1, -13.4]] }));
+  } finally { failHosts.delete('api.geoapify.com'); failHosts.delete('overpass'); delete process.env.GEOAPIFY_API_KEY; }
+});
+
+test('GEO-04 mergeResults no duplica un mismo grifo a <80 m', () => {
+  const { mergeResults } = require('../server/services/places');
+  const g = { kind: 'grifo', lat: -13.38, lon: -72.12, kmFromStart: 5, name: 'A' };
+  const a = { workshops: [], viewpoints: [], fuel: [g], complete: false, failedChunks: 1, totalChunks: 2 };
+  const b = { workshops: [], viewpoints: [], fuel: [{ ...g, lat: -13.3801, name: 'A (osm)' }, { ...g, lat: -13.5, kmFromStart: 20, name: 'B' }], complete: true, failedChunks: 0, totalChunks: 2 };
+  const m = mergeResults(a, b);
+  assert.equal(m.fuel.length, 2);
+  assert.equal(m.complete, true);
+});
