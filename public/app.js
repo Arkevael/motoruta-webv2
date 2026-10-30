@@ -472,9 +472,9 @@ function renderPhotos(data) {
     const credit = el('figcaption', {}, 'Foto de ',
       el('a', { href: p.photographerUrl, target: '_blank', rel: 'noopener', text: p.photographer }),
       ' en ',
-      el('a', { href: p.pexelsUrl, target: '_blank', rel: 'noopener', text: 'Pexels' }),
+      el('a', { href: p.sourceUrl, target: '_blank', rel: 'noopener', text: p.source || 'Pexels' }),
     );
-    gallery.append(el('figure', {}, el('a', { href: p.pexelsUrl, target: '_blank', rel: 'noopener' }, img), credit));
+    gallery.append(el('figure', {}, el('a', { href: p.sourceUrl, target: '_blank', rel: 'noopener' }, img), credit));
   }
   box.append(gallery);
 }

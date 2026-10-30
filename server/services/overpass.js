@@ -58,7 +58,11 @@ async function queryOverpass(query, deadline) {
       try {
         return await fetchJson(url, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            Accept: '*/*',
+            'User-Agent': process.env.NOMINATIM_USER_AGENT || 'MotoRuta-Web/1.0 (proyecto academico)',
+          },
           body: `data=${encodeURIComponent(query)}`,
           timeout: 20000,
         });

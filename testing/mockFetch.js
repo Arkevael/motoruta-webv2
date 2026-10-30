@@ -34,7 +34,9 @@ function install() {
       assert.equal(opts.method, 'POST');
       assert.equal(opts.headers['x-api-key'], 'clave-geoapify');
       const body = JSON.parse(opts.body);
-      assert.ok(body.filter.polyline.coordinates.length >= 2, 'debe enviar la ruta como polilínea');
+      assert.equal(body.filter.type, 'polyline');
+      assert.ok(body.filter.geometry.coordinates.length >= 2, 'debe enviar la ruta como polilínea');
+      assert.ok(body.filter.buffer > 0 && body.filter.buffer <= 100000);
       const cats = body.categories.join(',');
       const f = (id, lon, lat, props) => ({ type: 'Feature', geometry: { type: 'Point', coordinates: [lon, lat] }, properties: { place_id: id, lon, lat, ...props } });
       if (cats.includes('fuel')) return json({ features: [f('g1', -72.12, -13.38, { name: 'Grifo Geo Uno', categories: ['service.vehicle.fuel'] }), f('g2', -72.0, -13.5, { categories: ['service.vehicle.fuel'], datasource: { raw: { brand: 'Repsol', opening_hours: '24/7' } } })] });
@@ -77,6 +79,10 @@ function install() {
         },
       };
       return json(Array.from({ length: n }, () => one));
+    }
+    if (u.hostname === 'api.unsplash.com') {
+      assert.equal(opts.headers.Authorization, 'Client-ID clave-unsplash');
+      return json({ results: [{ id: 'u1', urls: { regular: 'https://images.unsplash.com/r.jpg', small: 'https://images.unsplash.com/s.jpg' }, alt_description: 'Valle sagrado', user: { name: 'Luis', links: { html: 'https://unsplash.com/@luis' } }, links: { html: 'https://unsplash.com/photos/u1' } }] });
     }
     if (u.hostname === 'api.pexels.com') {
       assert.equal(opts.headers.Authorization, 'clave-de-prueba');

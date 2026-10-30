@@ -18,7 +18,7 @@ app.set('trust proxy', 1); // Render/Railway/Fly están detrás de un proxy
 
 // Cabeceras de seguridad. Notas:
 //  - Referrer-Policy NO puede ser "no-referrer": los servidores de teselas de OpenStreetMap exigen Referer.
-//  - CSP permite solo lo que usa la app: Leaflet local, teselas de OSM e imágenes de Pexels.
+//  - CSP permite solo lo que usa la app: Leaflet local, teselas de OSM e imágenes de Unsplash/Pexels.
 app.use(
   helmet({
     referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
@@ -27,7 +27,7 @@ app.use(
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
-        imgSrc: ["'self'", 'data:', 'https://tile.openstreetmap.org', 'https://*.tile.openstreetmap.org', 'https://images.pexels.com'],
+        imgSrc: ["'self'", 'data:', 'https://tile.openstreetmap.org', 'https://*.tile.openstreetmap.org', 'https://images.pexels.com', 'https://images.unsplash.com'],
         connectSrc: ["'self'"],
         objectSrc: ["'none'"],
         frameAncestors: ["'self'"],
@@ -55,7 +55,8 @@ app.get('/api/health', (req, res) =>
     version: pkg.version,
     uptimeSeconds: Math.round(process.uptime()),
     demoMode: process.env.DEMO_MODE === 'true',
-    pexelsConfigured: Boolean(process.env.PEXELS_API_KEY),
+    photosConfigured: Boolean(process.env.UNSPLASH_ACCESS_KEY || process.env.PEXELS_API_KEY),
+    geoapifyConfigured: Boolean(process.env.GEOAPIFY_API_KEY),
     databaseConfigured: db.isConfigured(), // no se consulta la base aquí: así Neon puede suspenderse
     adminEnabled: Boolean(process.env.ADMIN_PASSWORD && process.env.ADMIN_PASSWORD.length >= 8),
   })
@@ -97,7 +98,7 @@ if (require.main === module) {
   const server = app.listen(port, () => {
     console.log(`MotoRuta Web v${pkg.version} escuchando en http://localhost:${port}`);
     if (process.env.DEMO_MODE === 'true') console.warn('⚠ DEMO_MODE activo: se devuelven datos de ejemplo.');
-    else if (!process.env.PEXELS_API_KEY) console.warn('⚠ PEXELS_API_KEY no configurada: no se mostrarán fotos.');
+    else if (!process.env.UNSPLASH_ACCESS_KEY && !process.env.PEXELS_API_KEY) console.warn('⚠ UNSPLASH_ACCESS_KEY / PEXELS_API_KEY no configuradas: no se mostrarán fotos.');
     if (!process.env.DATABASE_URL) console.warn('ℹ DATABASE_URL no configurada: no hay lugares agregados a mano.');
     if (process.env.DATABASE_URL && !(process.env.ADMIN_PASSWORD?.length >= 8)) console.warn('ℹ ADMIN_PASSWORD (mín. 8 caracteres) no definida: el panel /admin.html está deshabilitado.');
   });

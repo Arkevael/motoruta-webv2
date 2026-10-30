@@ -155,7 +155,8 @@ test('endpoint inexistente → 404 JSON', async () => {
 test('health check informa el estado sin exponer claves', async () => {
   const b = await (await get('/api/health')).json();
   assert.equal(b.status, 'ok');
-  assert.equal(b.pexelsConfigured, true);
+  assert.equal(b.photosConfigured, true);
+  assert.equal(b.geoapifyConfigured, false);
   assert.ok(!JSON.stringify(b).includes('clave-de-prueba'));
 });
 
@@ -261,4 +262,38 @@ test('GEO-04 mergeResults no duplica un mismo grifo a <80 m', () => {
   const m = mergeResults(a, b);
   assert.equal(m.fuel.length, 2);
   assert.equal(m.complete, true);
+});
+
+test('FOTO-01 con UNSPLASH_ACCESS_KEY usa Unsplash y devuelve crédito del autor con UTM', async () => {
+  process.env.UNSPLASH_ACCESS_KEY = 'clave-unsplash';
+  try {
+    const { getPhotos } = require('../server/services/photos');
+    const before = calls.filter((c) => c.startsWith('api.pexels')).length;
+    const photos = await getPhotos('Ollantaytambo');
+    assert.equal(photos.length, 1);
+    assert.equal(photos[0].source, 'Unsplash');
+    assert.equal(photos[0].thumb, 'https://images.unsplash.com/s.jpg');
+    assert.match(photos[0].photographerUrl, /utm_source=motoruta_web/);
+    assert.match(photos[0].sourceUrl, /utm_medium=referral/);
+    assert.equal(calls.filter((c) => c.startsWith('api.pexels')).length, before, 'no debe tocar Pexels');
+  } finally { delete process.env.UNSPLASH_ACCESS_KEY; }
+});
+
+test('FOTO-02 Unsplash caído → usa Pexels', async () => {
+  process.env.UNSPLASH_ACCESS_KEY = 'clave-unsplash';
+  failHosts.add('api.unsplash.com');
+  try {
+    const { getPhotos } = require('../server/services/photos');
+    const photos = await getPhotos('Cusco');
+    assert.equal(photos[0].source, 'Pexels');
+  } finally { failHosts.delete('api.unsplash.com'); delete process.env.UNSPLASH_ACCESS_KEY; }
+});
+
+test('FOTO-03 sin ninguna clave → error claro (la ruta lo muestra como aviso)', async () => {
+  const saved = process.env.PEXELS_API_KEY;
+  delete process.env.PEXELS_API_KEY;
+  try {
+    const { getPhotos } = require('../server/services/photos');
+    await assert.rejects(getPhotos('Cusco'), /UNSPLASH_ACCESS_KEY o PEXELS_API_KEY/);
+  } finally { process.env.PEXELS_API_KEY = saved; }
 });

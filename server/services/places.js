@@ -3,6 +3,7 @@
 const overpass = require('./overpass');
 const geoapify = require('./geoapify');
 const { haversine } = require('../utils/geo');
+const { HttpError } = require('../utils/http');
 
 /** Une dos resultados evitando duplicados (mismo tipo a menos de 80 m). */
 function mergeResults(a, b) {
@@ -22,11 +23,13 @@ function mergeResults(a, b) {
 
 async function findPlaces(geometry) {
   let first = null;
+  let geoError = null;
   if (geoapify.isConfigured()) {
     try {
       first = await geoapify.findPlaces(geometry);
       if (first.complete) return { ...first, sources: ['geoapify'] };
     } catch (err) {
+      geoError = err;
       console.warn(`Geoapify no disponible (${err.message}); se usa Overpass.`);
     }
   }
@@ -35,6 +38,7 @@ async function findPlaces(geometry) {
     return first ? mergeResults(first, second) : { ...second, sources: ['overpass'] };
   } catch (err) {
     if (first) return { ...first, sources: ['geoapify'] }; // al menos lo parcial de Geoapify
+    if (geoError) throw new HttpError(502, `Geoapify: ${geoError.message} · Overpass: ${err.message}`);
     throw err;
   }
 }

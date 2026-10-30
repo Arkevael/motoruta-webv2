@@ -20,13 +20,14 @@ Repositorio nuevo y vacío (sin README). En la carpeta del proyecto:
 3. En **Environment Variables** agrega:
    - DATABASE_URL = cadena de Neon (pooled)
    - ADMIN_PASSWORD = mínimo 8 caracteres
-   - PEXELS_API_KEY = clave de https://www.pexels.com/api
+   - UNSPLASH_ACCESS_KEY = Access Key de https://unsplash.com/developers (fotos; el plan demo permite 50 consultas/hora)
+   - PEXELS_API_KEY = opcional, respaldo de fotos (https://www.pexels.com/api)
    - NOMINATIM_USER_AGENT = MotoRuta/1.0 (tucorreo@ejemplo.com)
    - GEOAPIFY_API_KEY = clave gratuita de https://www.geoapify.com (recomendada: grifos/talleres/miradores más estables; sin ella se usa solo Overpass)
 4. Deploy.
 
 ## 4. Comprobar
-- /api/health  → debe responder ok
+- /api/health  → debe responder ok y mostrar photosConfigured/geoapifyConfigured en true
 - /            → buscar una ruta (Cusco → Ollantaytambo)
 - /admin.html  → entrar con ADMIN_PASSWORD; el estado debe decir que la base de datos está conectada.
   Agrega un taller de prueba y haz una ruta cerca para verlo en el mapa.

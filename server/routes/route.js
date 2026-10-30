@@ -1,5 +1,5 @@
 // GET /api/route?from=...&to=...
-// Compone Nominatim + OSRM y, en paralelo, Overpass + Open-Meteo + Pexels.
+// Compone Nominatim + OSRM y, en paralelo, Overpass + Open-Meteo + fotos.
 
 const express = require('express');
 const { HttpError } = require('../utils/http');
@@ -9,7 +9,7 @@ const { geocode } = require('../services/nominatim');
 const { getRoute } = require('../services/osrm');
 const { findPlaces } = require('../services/places');
 const { getWeather } = require('../services/openmeteo');
-const { getPhotos } = require('../services/pexels');
+const { getPhotos } = require('../services/photos');
 const { getElevationProfile } = require('../services/elevation');
 const { buildDemo } = require('../demo/sample');
 const manual = require('../services/manualPlaces');

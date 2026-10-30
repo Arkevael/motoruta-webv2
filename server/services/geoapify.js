@@ -24,7 +24,7 @@ function fetchGroup(points, radius, group) {
     headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.GEOAPIFY_API_KEY },
     body: JSON.stringify({
       categories: group.categories,
-      filter: { polyline: { type: 'LineString', coordinates: points }, buffer: radius },
+      filter: { type: 'polyline', geometry: { type: 'LineString', coordinates: points }, buffer: radius },
       limit: 500,
     }),
     timeout: 15000,
