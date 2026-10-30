@@ -53,9 +53,11 @@ async function loadPlaces(geometry) {
   if (osm.status === 'rejected' && own.status === 'rejected') throw osm.reason;
   const empty = { workshops: [], viewpoints: [], fuel: [] };
   const warnings = [];
-  if (osm.status === 'rejected') warnings.push(`OpenStreetMap: ${osm.reason?.message || 'no disponible'}`);
+  if (osm.status === 'rejected') warnings.push(`OpenStreetMap: ${osm.reason?.message || 'no disponible'}. Reintenta en un minuto.`);
+  else if (!osm.value.complete) warnings.push(`OpenStreetMap saturado: solo se consultaron ${osm.value.totalChunks - osm.value.failedChunks} de ${osm.value.totalChunks} tramos de la ruta. Reintenta en un minuto para ver todos los grifos.`);
   if (own.status === 'rejected') warnings.push(`Lugares propios: ${own.reason?.message || 'no disponibles'}`);
-  return { ...manual.mergePlaces(osm.value || empty, own.value || empty), warnings };
+  const fuelVerified = osm.status === 'fulfilled' && osm.value.complete;
+  return { ...manual.mergePlaces(osm.value || empty, own.value || empty), warnings, fuelVerified };
 }
 
 router.get('/', async (req, res, next) => {
@@ -90,7 +92,7 @@ router.get('/', async (req, res, next) => {
       return fallback;
     };
 
-    const placesData = unwrap(places, { workshops: [], viewpoints: [], fuel: [], warnings: [] }, 'Talleres, grifos y miradores');
+    const placesData = unwrap(places, { workshops: [], viewpoints: [], fuel: [], warnings: [], fuelVerified: false }, 'Talleres, grifos y miradores');
     warnings.push(...(placesData.warnings || []));
     const body = {
       origin,
@@ -101,6 +103,7 @@ router.get('/', async (req, res, next) => {
       workshops: placesData.workshops,
       viewpoints: placesData.viewpoints,
       fuel: placesData.fuel,
+      fuelVerified: placesData.fuelVerified !== false,
       elevation: unwrap(elevation, null, 'Elevación'),
       weather: unwrap(weather, [], 'Clima'),
       photos: unwrap(photos, [], 'Fotos'),

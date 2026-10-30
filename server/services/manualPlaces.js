@@ -108,7 +108,7 @@ function mergePlaces(osm, manual) {
   return {
     workshops: workshops.slice(0, 40),
     viewpoints: merge(osm.viewpoints, manual.viewpoints).sort(byKm).slice(0, 30),
-    fuel: merge(osm.fuel, manual.fuel).sort(byKm).slice(0, 80),
+    fuel: merge(osm.fuel, manual.fuel).sort(byKm).slice(0, 250),
   };
 }
 

@@ -4,6 +4,7 @@ process.env.NODE_ENV = 'test';
 process.env.NOMINATIM_DELAY_MS = '0';
 process.env.PEXELS_API_KEY = 'clave-de-prueba';
 process.env.RATE_LIMIT_MAX = '1000';
+process.env.OVERPASS_RETRY_DELAY_MS = '0';
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -187,4 +188,26 @@ test('modo demo devuelve datos de ejemplo sin llamar a ninguna API', async () =>
   } finally {
     delete process.env.DEMO_MODE;
   }
+});
+
+
+test('CE-06 ruta larga (1000 km): consulta por tramos y marca grifos; un espejo saturado no la rompe', async () => {
+  const { findPlaces } = require('../server/services/overpass');
+  const coordinates = Array.from({ length: 1001 }, (_, i) => [-72 + i * 0.01, -13.5 + i * 0.05]);
+  coordinates[0] = [-72.0, -13.5];
+  failHosts.add('overpass-api.de'); // 1.er espejo saturado → debe usar el siguiente
+  const before = calls.filter((c) => c.startsWith('overpass')).length;
+  const r = await findPlaces({ type: 'LineString', coordinates });
+  failHosts.delete('overpass-api.de');
+  const used = calls.filter((c) => c.startsWith('overpass')).length - before;
+  assert.ok(r.totalChunks >= 5, `debe dividir en varios tramos (fue ${r.totalChunks})`);
+  assert.ok(used >= r.totalChunks, 'una consulta por tramo como mínimo');
+  assert.equal(r.complete, true);
+});
+
+test('CE-07 todos los espejos fallan → findPlaces lanza error (la ruta lo degrada con aviso)', async () => {
+  const { findPlaces } = require('../server/services/overpass');
+  failHosts.add('overpass');
+  await assert.rejects(findPlaces({ type: 'LineString', coordinates: [[-72, -13.5], [-72.1, -13.4], [-72.2, -13.3]] }));
+  failHosts.delete('overpass');
 });

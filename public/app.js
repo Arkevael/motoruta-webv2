@@ -65,8 +65,8 @@ function setStatus(kind, text) {
   if (kind === 'loading') box.append(el('span', { class: 'roadbar', 'aria-hidden': 'true' }));
   box.append(text);
 }
-function pin(emoji) {
-  return L.divIcon({ className: '', html: `<div class="pin">${emoji}</div>`, iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -16] });
+function pin(emoji, cls = '') {
+  return L.divIcon({ className: '', html: `<div class="pin ${cls}">${emoji}</div>`, iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -16] });
 }
 
 // Misma tabla de códigos WMO que usa el backend (para el pronóstico por hora)
@@ -105,14 +105,14 @@ function drawMap(data) {
   L.marker([data.origin.lat, data.origin.lon], { icon: pin('🟢') }).bindPopup(`<b>Origen</b><br>${escapeHtml(shortName(data.origin.name))}`).addTo(layer);
   L.marker([data.destination.lat, data.destination.lon], { icon: pin('🏁') }).bindPopup(`<b>Destino</b><br>${escapeHtml(shortName(data.destination.name))}`).addTo(layer);
 
-  const add = (p, emoji) => {
-    const m = L.marker([p.lat, p.lon], { icon: pin(emoji) })
+  const add = (p, emoji, cls) => {
+    const m = L.marker([p.lat, p.lon], { icon: pin(emoji, cls) })
       .bindPopup(`<b>${escapeHtml(p.name)}</b><br>Km ${p.kmFromStart} del recorrido${p.manual ? '<br>📌 Agregado manualmente' : ''}${p.notes ? `<br><i>${escapeHtml(p.notes)}</i>` : ''}`)
       .addTo(layer);
     markersById.set(p.id, m);
   };
   data.workshops.forEach((p) => add(p, p.kind === 'moto' ? '🔧' : '🛠️'));
-  data.fuel.forEach((p) => add(p, '⛽'));
+  data.fuel.forEach((p) => add(p, '⛽', 'pin-fuel'));
   data.viewpoints.forEach((p) => add(p, '📷'));
 
   // Clima en el trayecto (se omiten origen y destino, que ya tienen su marcador)
@@ -233,6 +233,11 @@ function updateFuel() {
   const limit = range * 0.8; // 20 % de margen
   const bad = gaps.filter((g) => g.len > limit);
 
+  if (lastData.fuelVerified === false) {
+    // No se pudo consultar todo OpenStreetMap: no afirmar que hay (o no hay) tramos sin grifos
+    warn.append(el('div', { class: 'note warn', text: `⚠️ No se pudieron consultar todos los grifos de la ruta (el servicio de OpenStreetMap está saturado). ${lastData.fuel.length ? 'Los grifos de abajo son solo una parte; ' : ''}vuelve a calcular la ruta en un minuto antes de confiar en el análisis de combustible.` }));
+    return;
+  }
   if (!lastData.fuel.length) {
     warn.append(el('div', { class: 'note warn', text: `⚠️ No hay grifos registrados cerca de la ruta (${Math.round(lastData.distance / 1000)} km). Tu autonomía es ${range} km: confirma dónde cargar antes de salir.` }));
   } else if (bad.length) {
