@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Planifica tu viaje en moto: ruta, clima a la hora de llegada, grifos, talleres, miradores y altura en una sola búsqueda." />
+  <meta name="theme-color" content="#1e2124" />
+  <title>MotoRuta · Planifica tu viaje en moto</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><rect width='40' height='40' rx='9' fill='%23f5c400'/><path d='M9 34C9 24 31 24 31 15C31 11 27 8 23 8' fill='none' stroke='%231e2124' stroke-width='7' stroke-linecap='round'/></svg>" />
+  <link rel="preload" href="/fonts/barlow-condensed-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="/vendor/leaflet/leaflet.css" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="brand">
+        <svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="9" fill="#f5c400"/><path d="M9 34C9 24 31 24 31 15C31 11 27 8 23 8" fill="none" stroke="#1e2124" stroke-width="7" stroke-linecap="round"/><path d="M9 34C9 24 31 24 31 15C31 11 27 8 23 8" fill="none" stroke="#f5c400" stroke-width="1.6" stroke-dasharray="2.5 3.5"/></svg>
+        MotoRuta
+      </div>
+      <h1>Planifica tu viaje en moto antes de arrancar</h1>
+      <p class="lead">Ruta, clima a la hora en que llegues, grifos, talleres y altura. Todo en una sola búsqueda.</p>
+    </div>
+    <div class="roadline" aria-hidden="true"></div>
+  </header>
+
+  <main>
+    <form id="search" class="sign" autocomplete="off">
+      <div class="sign-inner">
+        <label>
+          <span>Origen</span>
+          <span class="input-group">
+            <input id="from" name="from" type="text" placeholder="Ej. Cusco" required minlength="2" maxlength="120" />
+            <button type="button" id="locate" class="ghost" title="Usar mi ubicación" aria-label="Usar mi ubicación">📍</button>
+          </span>
+        </label>
+        <button type="button" id="swap" class="ghost" title="Intercambiar origen y destino" aria-label="Intercambiar origen y destino">⇄</button>
+        <label>
+          <span>Destino</span>
+          <input id="to" name="to" type="text" placeholder="Ej. Ollantaytambo" required minlength="2" maxlength="120" />
+        </label>
+        <button type="submit" id="go" class="go">Buscar ruta</button>
+      </div>
+    </form>
+
+    <div class="examples">
+      Prueba con:
+      <button type="button" class="chip" data-from="Cusco" data-to="Ollantaytambo">Cusco → Ollantaytambo</button>
+      <button type="button" class="chip" data-from="Lima" data-to="Paracas">Lima → Paracas</button>
+      <button type="button" class="chip" data-from="Arequipa" data-to="Cabanaconde">Arequipa → Cabanaconde</button>
+    </div>
+    <div class="examples" id="favorites" hidden></div>
+    <div class="examples" id="recent" hidden></div>
+
+    <div id="status" role="status" aria-live="polite" hidden></div>
+    <noscript><p class="card">Esta aplicación necesita JavaScript activado.</p></noscript>
+
+    <section id="intro" class="intro">
+      <div><div class="ico y">🛣️</div><h3>Ruta y hora de llegada</h3><p>Distancia, duración y si llegarás con luz de día.</p></div>
+      <div><div class="ico b">🌦️</div><h3>Clima en cada tramo</h3><p>El pronóstico para la hora en que pasarás por cada punto.</p></div>
+      <div><div class="ico g">⛽</div><h3>Grifos y talleres</h3><p>Con aviso si hay un tramo largo sin combustible.</p></div>
+      <div><div class="ico k">⛰️</div><h3>Altura del recorrido</h3><p>Perfil de elevación y avisos de soroche y frío.</p></div>
+    </section>
+
+    <section id="results" hidden>
+      <div id="notices"></div>
+      <div class="grid">
+        <div class="card map-card"><div id="map" aria-label="Mapa de la ruta"></div></div>
+        <aside class="side">
+          <div class="card" id="summary"></div>
+          <div class="card" id="weather"></div>
+        </aside>
+      </div>
+
+      <div class="card" id="elevation"></div>
+      <div class="card" id="places"></div>
+      <div class="card" id="photos"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>
+      Datos de <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>,
+      Nominatim, OSRM, Overpass, <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> y
+      <a href="https://www.pexels.com" target="_blank" rel="noopener">Pexels</a>.
+      Verifica siempre el estado de la vía antes de viajar.
+    </p>
+  </footer>
+
+  <script src="/vendor/leaflet/leaflet.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

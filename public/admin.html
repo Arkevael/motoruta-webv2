@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#1e2124" />
+  <title>Administrar lugares · MotoRuta</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛠️</text></svg>" />
+  <link rel="stylesheet" href="/vendor/leaflet/leaflet.css" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header class="hero hero-sm">
+    <div class="hero-inner">
+      <div class="brand">
+        <svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="9" fill="#f5c400"/><path d="M9 34C9 24 31 24 31 15C31 11 27 8 23 8" fill="none" stroke="#1e2124" stroke-width="7" stroke-linecap="round"/><path d="M9 34C9 24 31 24 31 15C31 11 27 8 23 8" fill="none" stroke="#f5c400" stroke-width="1.6" stroke-dasharray="2.5 3.5"/></svg>
+        MotoRuta
+      </div>
+      <h1>Administrar lugares</h1>
+      <p class="lead">Talleres, grifos y miradores propios. Se suman a los de OpenStreetMap en cada ruta.</p>
+    </div>
+    <div class="roadline" aria-hidden="true"></div>
+  </header>
+
+  <main>
+    <div id="msg" role="status" aria-live="polite" hidden></div>
+
+    <form id="login" class="sign sign-narrow">
+      <div class="sign-inner">
+        <label>
+          <span>Clave de administración</span>
+          <input id="key" type="password" autocomplete="current-password" required />
+        </label>
+        <button type="submit" class="go">Entrar</button>
+        <p class="hint">La clave es la variable <code>ADMIN_PASSWORD</code> del servidor.</p>
+      </div>
+    </form>
+
+    <section id="panel" hidden>
+      <p class="actions"><a href="/">← Volver al planificador</a> <button type="button" id="logout">Salir</button></p>
+
+      <div class="admin-grid">
+        <div class="card map-card"><div id="amap" aria-label="Mapa para elegir la ubicación"></div></div>
+
+        <form id="form" class="card">
+          <h2 id="form-title">Nuevo lugar</h2>
+          <p class="hint">Haz clic en el mapa para elegir la ubicación (o arrastra el marcador).</p>
+          <label><span>Nombre</span><input id="name" required minlength="2" maxlength="100" /></label>
+          <label>
+            <span>Tipo</span>
+            <select id="kind">
+              <option value="moto">🔧 Taller de motos</option>
+              <option value="auto">🛠️ Taller mecánico</option>
+              <option value="grifo">⛽ Grifo</option>
+              <option value="mirador">📷 Mirador</option>
+            </select>
+          </label>
+          <div class="row2">
+            <label><span>Latitud</span><input id="lat" type="number" step="any" min="-90" max="90" required /></label>
+            <label><span>Longitud</span><input id="lon" type="number" step="any" min="-180" max="180" required /></label>
+          </div>
+          <label><span>Teléfono (opcional)</span><input id="phone" maxlength="30" /></label>
+          <label><span>Horario (opcional)</span><input id="hours" maxlength="100" placeholder="Lu-Sa 8:00-18:00" /></label>
+          <label><span>Notas (opcional)</span><textarea id="notes" maxlength="300" rows="3" placeholder="Referencia, servicios, precios…"></textarea></label>
+          <div class="actions">
+            <button type="submit" class="primary" id="save">Guardar</button>
+            <button type="button" id="locate">📍 Mi ubicación</button>
+            <button type="button" id="cancel" hidden>Cancelar edición</button>
+            <button type="button" id="delete" hidden>🗑️ Eliminar</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Lugares guardados <span id="count" class="legend-count"></span></h2>
+        <div class="table-wrap">
+          <table id="list">
+            <thead><tr><th>Nombre</th><th>Tipo</th><th>Coordenadas</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/vendor/leaflet/leaflet.js"></script>
+  <script src="/admin.js"></script>
+</body>
+</html>
